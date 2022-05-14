@@ -1,3 +1,2 @@
-
-rootProject.name = "HuionHS610"
+rootProject.name = "k-input-driver"
 
