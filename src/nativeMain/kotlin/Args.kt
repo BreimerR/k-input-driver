@@ -1,10 +1,10 @@
-
 class Args(private vararg val string: String) {
 
     var configFilePath: String = "~/.config/k-input-driver.conf"
 
     enum class Commands(vararg val expressions: String) {
-        FILE("-(f|F)", "-((f|F)(i|I)(l|L)(e|E))");
+        RESTART("-(r|R)", "--(r|R)(e|E)(s|S)(t|T)(a|A)(r|R)(t|T)"),
+        FILE("-(f|F)", "--((f|F)(i|I)(l|L)(e|E))");
 
         infix fun test(receiver: String): Boolean {
             for (expression in expressions) {
@@ -26,18 +26,20 @@ class Args(private vararg val string: String) {
         parse(*string)
     }
 
-    fun parse(vararg args: String) {
+    private fun parse(vararg args: String) {
         var i = 0
 
         while (i < args.size) {
 
             val arg = args[i++]
 
-            when (Commands(arg)) {
+            when (val command = Commands(arg)) {
                 Commands.FILE -> configFilePath = args[i++]
                 null -> {
                     println("Unrecognized command")
-
+                }
+                else -> {
+                    println("Unrecognized command $command")
                 }
             }
 
