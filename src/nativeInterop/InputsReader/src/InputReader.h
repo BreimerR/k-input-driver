@@ -17,8 +17,6 @@
 #include <sys/mman.h>
 //#include <sys/wait.h>
 
-typedef void (*OnEvent)(const char *description, struct input_event, const char *error);
-
 
 static struct input_event eventStruct() {
     struct input_event inputEvent;
@@ -47,27 +45,6 @@ static size_t getEventPointerSize() {
     return sizeof(struct input_event);
 }
 
-
-static int readEvent(const char *eventPath, OnEvent onEvent) {
-
-    int fileId = open(eventPath, O_RDONLY);
-    struct input_event inputEvent;
-
-    if (fileId == -1) {
-        onEvent("Failed to read events from:", inputEvent, eventPath);
-        return -1;
-    }
-
-    while (read(fileId, &inputEvent, sizeof(struct input_event))) {
-        onEvent("Success", inputEvent, NULL);
-    }
-
-    close(fileId);
-
-
-    return 1;
-
-}
 
 typedef void (*OnCharRead)(
         const char content,
@@ -130,25 +107,31 @@ static void readLine(const char *path, OnLineRead onLineRead) {
 
 }
 
+struct CommandResult {
+    const char *result;
+};
+
+
 
 typedef void (*OnFail)(const char *message);
 
 /*FEEL IT'S A BIT SLOW NOT SURE WHY YET BUT CODE DOESN'T LOOK GREAT EITHER*/
 static char *execute(const char *command, OnFail onFail) {
-    FILE *file;
+    FILE *stream;
 
-    file = popen(command, "r");
+    stream = popen(command, "r");
 
-    if (command) {
+    if (stream != NULL) {
+
         char *result;
 
         int i = 1;
 
-        while (!feof(file)) {
+        while (!feof(stream)) {
             char *current = result;
             result = (char *) malloc(i);
             int l = i - 1;
-            result[l] = (char) fgetc(file);;
+            result[l] = (char) fgetc(stream);;
             int c = 0;
 
             while (c < l) {
@@ -159,9 +142,10 @@ static char *execute(const char *command, OnFail onFail) {
             current = NULL;
 
             i++;
+
         }
 
-        pclose(file);
+        pclose(stream);
 
         return result;
 

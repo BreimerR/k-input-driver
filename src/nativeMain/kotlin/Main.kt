@@ -1,17 +1,28 @@
-/**
- * Pass the device name as an argument
- * This will reduce the event loop
- * consuming too much cpu time
- * TODO for device addition and removal
- * https://www.tecmint.com/udev-for-device-detection-management-in-linux/
- **/
+import interop.io.execute
+import kotlinx.cinterop.staticCFunction
+import kotlinx.cinterop.toKString
+
 fun main(vararg args: String) {
 
-    val commandsListenerListener = InputService()
+    Args(*args).apply {
 
-    val file = "/opt/Projects/Kotlin/HuionHS610/master/src/nativeMain/resources/example.conf"
-    configs.read(file)
+        val commandsListenerListener = InputService()
 
-    commandsListenerListener.run()
+        val path = if (configFilePath.trim().startsWith("~")) buildString {
+            val echo = execute("echo $configFilePath", staticCFunction { it -> })?.toKString()
+                ?: throw RuntimeException("Invalid config file path passed $configFilePath")
+
+            for (char in echo) { // A problem with result having a new line and an extra character not sure what it is yet
+                if (char == '\n') break else this.append(char)
+            }
+
+        } else configFilePath
+
+        configs.read(path)
+
+        commandsListenerListener.run()
+
+    }
 
 }
+

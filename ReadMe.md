@@ -1,5 +1,9 @@
 # K-Input-Driver
 
+## KIND WARNING
+***THE DRIVER DOES NOT START ON DEVICE ATTACH OR REMOVE JUST HAVEN'T CONFIGURED IT YET THUS WILL EXIT APPLICATION ON DEVICE REMOVE BUT NOT RESTART ON DEVICE INSERT***
+> Will do so once I do code cleanup and optimizations.
+
 The library contains simple input-driver that should be able
 to read from any device with a defined name..
 
